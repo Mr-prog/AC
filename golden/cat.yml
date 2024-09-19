@@ -1,0 +1,13 @@
+in_source: |
+  READ_PORT R1
+  WRITE_PORT R1
+  NOP
+in_stdin: "Some input text"
+out_code: |
+  opcode=READ_PORT operands_type=ONE operands=[1]
+  opcode=WRITE_PORT operands_type=ONE operands=[1]
+  opcode=NOP operands_type=NONE operands=[]
+out_stdout: "Some input text"
+out_log: |
+  DEBUG:translator:Start translation...
+  DEBUG:machine:Running program...

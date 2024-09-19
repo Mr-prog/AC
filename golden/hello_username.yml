@@ -1,0 +1,25 @@
+in_source: |
+  LOADI "What is your name?", R1
+  WRITE_PORT R1
+  READ_PORT R2
+  LOADI "Hello, ", R3
+  WRITE_PORT R3
+  WRITE_PORT R2
+  LOADI "!", R4
+  WRITE_PORT R4
+  NOP
+in_stdin: "Alice"
+out_code: |
+  opcode=LOADI operands_type=TWO operands=['What is your name?', 1]
+  opcode=WRITE_PORT operands_type=ONE operands=[1]
+  opcode=READ_PORT operands_type=ONE operands=[2]
+  opcode=LOADI operands_type=TWO operands=['Hello, ', 3]
+  opcode=WRITE_PORT operands_type=ONE operands=[3]
+  opcode=WRITE_PORT operands_type=ONE operands=[2]
+  opcode=LOADI operands_type=TWO operands=['!', 4]
+  opcode=WRITE_PORT operands_type=ONE operands=[4]
+  opcode=NOP operands_type=NONE operands=[]
+out_stdout: "What is your name?Hello, Alice!"
+out_log: |
+  DEBUG:translator:Start translation...
+  DEBUG:machine:Running program...

@@ -1,0 +1,45 @@
+in_source: |-
+  CONST Fib1, 1
+  CONST Fib2, 2
+  LOADMEMORY Fib1, R1              ; Первое число Фибоначчи
+  LOADMEMORY Fib2, R2              ; Второе число Фибоначчи
+  LOADMEMORY Fib2, R3                     ; Сумма чётных чисел
+  LOADI 4000000, R4               ; Предел вычислений
+  ADD R1, R2, R5                  ; Вычислить следующее число Фибоначчи
+  fib_loop:
+    MOV R2, R1                      ; Обновить R1
+    MOV R5, R2                      ; Обновить R2
+    ADD R1, R2, R5                  ; Вычислить следующее число Фибоначчи
+    MOD R5, 2, R6                   ; Проверка чётности
+    JZ R6, add_to_sum               ; Если число чётное, перейти к добавлению
+  check_limit:
+    SUB R4, R5, R7                  ; Проверка, не превышает ли число лимит
+    JZ R7, end                      ; Если превышает, завершить программу
+    JUMP fib_loop                   ; Иначе продолжить цикл
+  add_to_sum:
+    ADD R3, R5, R3                  ; Добавить чётное число к сумме
+    JUMP check_limit                ; Вернуться к проверке предела
+  end:
+    WRITE_PORT R3            ; Вывести сумму на экран
+    NOP                             ; Завершение программы
+in_stdin: ""
+out_code: |
+  opcode=LOADI operands_type=TWO operands=[1, 1]
+  opcode=LOADI operands_type=TWO operands=[2, 2]
+  opcode=LOADI operands_type=TWO operands=[0, 3]
+  opcode=LOADI operands_type=TWO operands=[4000000, 4]
+  opcode=ADD operands_type=THREE operands=[1, 2, 5]
+  opcode=JZ operands_type=TWO operands=[5, 13]
+  opcode=MOD operands_type=THREE operands=[5, 2, 6]
+  opcode=JZ operands_type=TWO operands=[6, 11]
+  opcode=MOV operands_type=TWO operands=[2, 1]
+  opcode=MOV operands_type=TWO operands=[5, 2]
+  opcode=JUMP operands_type=ONE operands=[5]
+  opcode=ADD operands_type=THREE operands=[3, 5, 3]
+  opcode=JUMP operands_type=ONE operands=[9]
+  opcode=WRITE_PORT operands_type=ONE operands=[3]
+  opcode=NOP operands_type=NONE operands=[]
+out_stdout: "4613732"
+out_log: |
+  DEBUG:translator:Start translation...
+  DEBUG:machine:Running program...

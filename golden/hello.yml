@@ -1,0 +1,17 @@
+in_source: |
+  LOADI "hello", R1
+  LOADI " world", R2
+  WRITE_PORT R1
+  WRITE_PORT R2
+  NOP
+in_stdin: ""
+out_code: |
+  opcode=LOADI operands_type=TWO operands=['hello', 1]
+  opcode=LOADI operands_type=TWO operands=[' world', 2]
+  opcode=WRITE_PORT operands_type=ONE operands=[1]
+  opcode=WRITE_PORT operands_type=ONE operands=[2]
+  opcode=NOP operands_type=NONE operands=[]
+out_stdout: "hello world"
+out_log: |
+  DEBUG:translator:Start translation...
+  DEBUG:machine:Running program...
