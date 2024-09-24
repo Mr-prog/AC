@@ -1,0 +1,5 @@
+  section_program
+  start:
+    READ_PORT
+    WRITE_PORT R4
+    NOP

@@ -1,0 +1,10 @@
+  section_data
+  hello $ hello
+  world $ , world!
+  section_program
+  start:
+    LOADMEMORY hello R6
+    LOADMEMORY world R7
+    WRITE_PORT R6
+    WRITE_PORT R7
+    NOP

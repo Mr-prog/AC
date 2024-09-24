@@ -1,0 +1,29 @@
+  section_data
+  max_limit $ 4000000 
+  fib1 $ 1
+  fib2 $ 2
+  zero $ 0
+  section_program
+    LOADMEMORY fib1 R6    ; R6 = 1 (F(n-2))
+    LOADMEMORY fib2 R7    ; R7 = 2 (F(n-1))
+    LOADMEMORY fib2 R15
+    LOADMEMORY zero R14
+    LOADMEMORY max_limit R9
+    ADD R0 R14 R8         
+  fib_loop:
+    SUB R9 R7 R10            
+    JZ end_program           
+    MOD R7 R15 R10            
+    JZ is_even               
+  next_fib:
+    ADD R6 R7 R11            
+    ADD R7 R0 R6            
+    ADD R11 R0 R7            
+    JUMP fib_loop            
+  is_even:
+    ADD R7 R8 R12
+    ADD R12 R0 R8
+    JUMP next_fib            
+  end_program:
+    WRITE_PORT R12            
+    NOP                      

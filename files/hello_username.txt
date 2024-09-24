@@ -1,0 +1,15 @@
+  section_data
+  question $ What is your name?
+  hello $ Hello, 
+  mark $ !
+  section_program
+  start:
+    LOADMEMORY question R6
+    LOADMEMORY hello R7
+    LOADMEMORY mark R8
+    WRITE_PORT R6
+    READ_PORT
+    WRITE_PORT R7
+    WRITE_PORT R4
+    WRITE_PORT R8
+    NOP
