@@ -264,7 +264,7 @@ out_code: |
   Instruction counter: 231, ADD ['R11', 'R0', 'R7']
   Instruction counter: 232, JUMP [6]
   Instruction counter: 233, SUB ['R9', 'R7', 'R10']
-  Instruction counter: 233, JZ [17]
+  Instruction counter: 234, JZ [17]
   Instruction counter: 235, MOD ['R7', 'R15', 'R10']
   Instruction counter: 236, JZ [14]
   Instruction counter: 237, ADD ['R6', 'R7', 'R11']
