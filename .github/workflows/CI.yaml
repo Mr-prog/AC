@@ -40,7 +40,8 @@ jobs:
         with:
           python-version: '3.11'
       - name: Install pytest
-        run: pip install pytest-golden
+        run: |
+          pip install pytest-golden
           pip install pytest
       - name: Run tests
         run: pytest
