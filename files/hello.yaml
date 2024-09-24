@@ -11,6 +11,18 @@ start:
     WRITE_PORT R2, POUT             ; Вывести имя пользователя на экран
     LOADI "!", R4                   ; Загрузить символ восклицательного знака
     WRITE_PORT R4, POUT             ; Вывести восклицательный знак
-
 end:
     NOP                             ; Завершение программы
+
+
+
+section_data
+    question $ What is your name?
+    exclamation $ !
+section_program
+    LOADMEMORY question R3
+    READ_PORT
+    MOV R3 R4
+    LOADMEMORY exclamation R4
+    WRITE_PORT
+    NOP

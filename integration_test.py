@@ -19,6 +19,7 @@ def test_translator_and_machine(golden, caplog):
         source = os.path.join(tmpdirname, "source.src")
         input_stream = os.path.join(tmpdirname, "input.txt")
         target = os.path.join(tmpdirname, "target.o")
+        target_code = os.path.join(tmpdirname, "target_code.mnemonics")
         print(source, input_stream, target)
 
         # Записываем входные данные в файлы. Данные берутся из теста.
@@ -32,22 +33,30 @@ def test_translator_and_machine(golden, caplog):
             asm_code = asm_file.readlines()
 
         # Запускаем переводчик
-        translator_instance = translator.Translator()
-        instructions = translator_instance.translate(asm_code)
+        translator_instance = translator.Translator(asm_code)
+        data, instructions = translator_instance.translate()
 
         # Симуляция машины с инструкциями
         with open(input_stream, "r", encoding="utf-8") as input_file:
-            input_data = list(input_file.read().strip())  # Преобразуем данные во входной поток
-        output, instr_counter = machine.simulation([], instructions, input_data, 100000)
+            file_contents = input_file.read()
+            input_data = translator_instance.parse_input_stream(file_contents)               
+        output, instr_counter, mnemonic = machine.simulation(data, instructions, input_data, 100000)
 
         # Записываем результат в выходной файл
         with open(target, "w", encoding="utf-8") as file:
             file.write(output)
 
+        with open(target_code, "w", encoding="utf-8") as file:
+            file.write(mnemonic)     
+            
         # Проверяем результат работы
         with open(target, encoding="utf-8") as file:
             code = file.read()
 
+        with open(target_code, encoding="utf-8") as file:
+            outcode = file.read()
+
         # Проверка соответствия данных
         assert code == golden["out_stdout"]
-        #assert caplog.text == golden["out_log"]
+        assert caplog.text == golden["out_log"]
+        assert outcode == golden["out_code"]

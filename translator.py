@@ -1,81 +1,91 @@
-from isa import Opcode, OpcodeOperandsType, Instruction
-import re
-
+from isa import Opcode
+from isa import OpcodeOperandsType
+from isa import Instruction
 class Translator:
-    def __init__(self):
-        self.label_map = {}
+    def __init__(self, asm_code: list[str]):
+        self.asm_code = asm_code
+        self.labels = {}
         self.instructions = []
-        self.current_instruction_index = 0  # Для правильного индекса команд
+        self.data = {}
+        self.input_stream = []
+        self.init_data = []
+        self.section_data_found = False
+        self.section_programm_found = False
+    
+    def _remove_comments_and_empty_lines(self):
+        """Удаляет комментарии и пустые строки."""
+        clean_code = []
+        for line in self.asm_code:
+            clean_line = line.split(';')[0].strip()  
+            if clean_line:
+                clean_code.append(clean_line)
+        self.asm_code = clean_code
+    
+    def _parse_labels(self):
+        """Находит метки в секции программы и заменяет их на индексы."""
+        instruction_counter = 0
+        for i, line in enumerate(self.asm_code):
+            if ":" in line:
+                label = line.split(":")[0].strip()
+                self.labels[label] = instruction_counter  
+                self.asm_code[i] = line.split(":")[1].strip()
+            if self.asm_code[i]:
+                instruction_counter += 1
+    
+    def _parse_instructions(self):
+        """Парсит инструкции в секции программы, заменяя метки на индексы."""
+        for line in self.asm_code:
+            if line and not line.startswith("section_"):  
+                parts = line.split()
+                opcode_str = parts[0]
+                operands = parts[1:]
+                operands = [self.labels.get(operand, operand) for operand in operands]
+                operands = [int(op) if isinstance(op, str) and op.isdigit() else op for op in operands]
+                opcode = Opcode[opcode_str.upper()]
+                operands_type = OpcodeOperandsType(len(operands))
+                instruction = Instruction(opcode, operands_type, operands)
+                self.instructions.append(instruction)
 
-    def remove_comments(self, line: str) -> str:
-        return line.split(';', 1)[0].strip()
-
-    def remove_empty_lines(self, lines: list[str]) -> list[str]:
-        return [line for line in lines if line.strip()]
-
-    def find_labels(self, lines: list[str]):
-        """Сбор меток и привязка их к индексам команд"""
-        for line in lines:
-            if ':' in line:
-                label, instruction = line.split(':', 1)
-                self.label_map[label.strip()] = self.current_instruction_index
-                if instruction.strip():  # Если после метки есть команда, увеличиваем индекс
-                    self.current_instruction_index += 1
-            else:
-                self.current_instruction_index += 1  # Увеличиваем индекс для команды
-
-    def process_labels(self, lines: list[str]):
-        """Обработка инструкций и замена меток на их индексы"""
-        for line in lines:
-            if ':' in line:
-                _, line = line.split(':', 1)  # Пропускаем метку, если она есть
-
-            if not line.strip():  # Пропускаем пустые строки
-                continue
-
-            parts = re.findall(r'"[^"]*"|\w+', line)
-            opcode = Opcode[parts[0]]
-            operands = parts[1:]
-
-            # Проверка количества операндов
-            if len(operands) != opcode.operand_count:
-                raise ValueError(f"Ошибка: Операция {opcode.name} требует {opcode.operand_count} операндов, "
-                                 f"но было передано {len(operands)}.")
-
-            # Замена меток на номера строк
-            new_operands = []
-            for op in operands:
-                if op.startswith('"') and op.endswith('"'):
-                    # Это строка, оставляем её как есть
-                    new_operands.append(op.strip('"'))
-                elif op.isdigit():
-                    # Это число, преобразуем его
-                    new_operands.append(int(op))
+    def _parse_data_section(self):
+        for line in self.asm_code:
+            if line.lower().startswith("section_data"):
+                self.section_data_found = True
+            elif line.lower().startswith("section_program"):
+                break 
+            elif self.section_data_found:
+                line = line.strip()  
+                if " $ " in line:
+                    key, value = line.split(" $ ", 1)  
+                    self.data[key.strip()] = value.strip()
                 else:
-                    # Это метка или регистр, заменяем метку на её индекс
-                    new_operands.append(self.label_map.get(op, op))
+                    raise ValueError(f"Неверный формат строки данных: '{line}'")
 
-            # Определение типа операндов
-            if opcode.operand_count == 3:
-                operands_type = OpcodeOperandsType.THREE
-            elif opcode.operand_count == 2:
-                operands_type = OpcodeOperandsType.TWO
-            elif opcode.operand_count == 1:
-                operands_type = OpcodeOperandsType.ONE
-            else:
-                operands_type = OpcodeOperandsType.NONE
+    
+    def _parse_program_section(self):
+        """Парсит секцию программ (section_programm)."""
+        parsing_programm = False
+        clean_program_code = []
+        for line in self.asm_code:
+            if line.lower().startswith("section_program"):
+                parsing_programm = True
+                self.section_programm_found = True
+                continue
+            if parsing_programm:
+                clean_program_code.append(line)
+        self.asm_code = clean_program_code
 
-            self.instructions.append(Instruction(opcode, operands_type, new_operands))
+    def parse_input_stream(self, input_stream_str: str):
+        input_stream = [char.strip().strip('"') for char in input_stream_str.split(",")]
+    
+        return input_stream
 
-    def translate(self, asm_code: list[str]) -> list[Instruction]:
-        """Основной метод перевода: удаление комментариев, сбор меток и перевод команд"""
-        # Удаление комментариев и пустых строк
-        cleaned_code = self.remove_empty_lines([self.remove_comments(line) for line in asm_code])
+    
+    def translate(self):
+        """Основной метод, вызываемый для выполнения всех этапов парсинга."""
+        self._remove_comments_and_empty_lines()
+        self._parse_data_section()  
+        self._parse_program_section()  
+        self._parse_labels()  
+        self._parse_instructions()  
 
-        # Первый проход: сбор меток
-        self.find_labels(cleaned_code)
-
-        # Второй проход: обработка инструкций и замена меток на адреса
-        self.process_labels(cleaned_code)
-
-        return self.instructions
+        return self.data, self.instructions

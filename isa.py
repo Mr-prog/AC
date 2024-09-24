@@ -1,21 +1,17 @@
 from enum import Enum
 
-from enum import Enum
 
 class Opcode(Enum):
-    LOADI = (1, 2)
     ADD = (2, 3)
-    MOV = (3, 2)
     MOD = (4, 3)
     JZ = (5, 2)
     SUB = (6, 3)
-    JUMP = (7, 1)
-    WRITE_PORT = (8, 1)
+    JUMP = (7, 2)
+    WRITE_PORT = (8, 2)
     READ_PORT = (9, 1)
-    NOP = (10, 0)
-    CONST = (11, 2)  # Новая команда CONST для работы с памятью
-    LOADMEMORY = (12, 2)  # Новая команда для загрузки из памяти в регистр
-
+    NOP = (10, 1)
+    LOADMEMORY = (12, 3)  
+    
     def __init__(self, code, num_operands):
         self.code = code
         self.num_operands = num_operands
@@ -27,10 +23,10 @@ class Opcode(Enum):
 
 class OpcodeOperandsType(Enum):
     """Перечисление для типов операндов."""
-    NONE = 1
-    ONE = 2
-    TWO = 3
-    THREE = 4
+    NONE = 0
+    ONE = 1
+    TWO = 2
+    THREE = 3
 
 
 class Instruction:

@@ -1,45 +1,616 @@
 in_source: |-
-  CONST Fib1, 1
-  CONST Fib2, 2
-  LOADMEMORY Fib1, R1              ; Первое число Фибоначчи
-  LOADMEMORY Fib2, R2              ; Второе число Фибоначчи
-  LOADMEMORY Fib2, R3                     ; Сумма чётных чисел
-  LOADI 4000000, R4               ; Предел вычислений
-  ADD R1, R2, R5                  ; Вычислить следующее число Фибоначчи
+  section_data
+  max_limit $ 4000000 
+  fib1 $ 1
+  fib2 $ 2
+  zero $ 0
+  section_program
+    LOADMEMORY fib1 R6    ; R6 = 1 (F(n-2))
+    LOADMEMORY fib2 R7    ; R7 = 2 (F(n-1))
+    LOADMEMORY fib2 R15
+    LOADMEMORY zero R14
+    LOADMEMORY max_limit R9
+    ADD R0 R14 R8          ; R8 = 0 (сумма четных чисел)
   fib_loop:
-    MOV R2, R1                      ; Обновить R1
-    MOV R5, R2                      ; Обновить R2
-    ADD R1, R2, R5                  ; Вычислить следующее число Фибоначчи
-    MOD R5, 2, R6                   ; Проверка чётности
-    JZ R6, add_to_sum               ; Если число чётное, перейти к добавлению
-  check_limit:
-    SUB R4, R5, R7                  ; Проверка, не превышает ли число лимит
-    JZ R7, end                      ; Если превышает, завершить программу
-    JUMP fib_loop                   ; Иначе продолжить цикл
-  add_to_sum:
-    ADD R3, R5, R3                  ; Добавить чётное число к сумме
-    JUMP check_limit                ; Вернуться к проверке предела
-  end:
-    WRITE_PORT R3            ; Вывести сумму на экран
-    NOP                             ; Завершение программы
-in_stdin: ""
+    SUB R9 R7 R10            ; R10 = max_limit - R7
+    JZ end_program           ; Если R7 >= 4000000, завершить программу
+    MOD R7 R15 R10            ; R10 = R7 % 2
+    JZ is_even               ; Если остаток 0, число четное
+  next_fib:
+    ADD R6 R7 R11            ; R11 = F(n-2) + F(n-1) = F(n)
+    ADD R7 R0 R6             ; R6 = R7 (переместить значение R7 в R6)
+    ADD R11 R0 R7            ; R7 = R11 (переместить значение R11 в R7)
+    JUMP fib_loop            ; Переход на следующую итерацию
+  is_even:
+    ADD R7 R8 R12
+    ADD R12 R0 R8
+    JUMP next_fib            ; Переход на следующую итерацию
+  end_program:
+    WRITE_PORT R12            ; Вывести сумму четных чисел
+    NOP                      ; Завершить программу
+in_stdin: ''
 out_code: |
-  opcode=LOADI operands_type=TWO operands=[1, 1]
-  opcode=LOADI operands_type=TWO operands=[2, 2]
-  opcode=LOADI operands_type=TWO operands=[0, 3]
-  opcode=LOADI operands_type=TWO operands=[4000000, 4]
-  opcode=ADD operands_type=THREE operands=[1, 2, 5]
-  opcode=JZ operands_type=TWO operands=[5, 13]
-  opcode=MOD operands_type=THREE operands=[5, 2, 6]
-  opcode=JZ operands_type=TWO operands=[6, 11]
-  opcode=MOV operands_type=TWO operands=[2, 1]
-  opcode=MOV operands_type=TWO operands=[5, 2]
-  opcode=JUMP operands_type=ONE operands=[5]
-  opcode=ADD operands_type=THREE operands=[3, 5, 3]
-  opcode=JUMP operands_type=ONE operands=[9]
-  opcode=WRITE_PORT operands_type=ONE operands=[3]
-  opcode=NOP operands_type=NONE operands=[]
-out_stdout: "4613732"
+  Instruction counter: 0, LOADMEMORY ['fib1', 'R6']
+  Instruction counter: 1, LOADMEMORY ['fib2', 'R7']
+  Instruction counter: 2, LOADMEMORY ['fib2', 'R15']
+  Instruction counter: 3, LOADMEMORY ['zero', 'R14']
+  Instruction counter: 4, LOADMEMORY ['max_limit', 'R9']
+  Instruction counter: 5, ADD ['R0', 'R14', 'R8']
+  Instruction counter: 6, SUB ['R9', 'R7', 'R10']
+  Instruction counter: 7, JZ [17]
+  Instruction counter: 8, MOD ['R7', 'R15', 'R10']
+  Instruction counter: 9, JZ [14]
+  Instruction counter: 10, ADD ['R7', 'R8', 'R12']
+  Instruction counter: 11, ADD ['R12', 'R0', 'R8']
+  Instruction counter: 12, JUMP [10]
+  Instruction counter: 13, ADD ['R6', 'R7', 'R11']
+  Instruction counter: 14, ADD ['R7', 'R0', 'R6']
+  Instruction counter: 15, ADD ['R11', 'R0', 'R7']
+  Instruction counter: 16, JUMP [6]
+  Instruction counter: 17, SUB ['R9', 'R7', 'R10']
+  Instruction counter: 18, JZ [17]
+  Instruction counter: 19, MOD ['R7', 'R15', 'R10']
+  Instruction counter: 20, JZ [14]
+  Instruction counter: 21, ADD ['R6', 'R7', 'R11']
+  Instruction counter: 22, ADD ['R7', 'R0', 'R6']
+  Instruction counter: 23, ADD ['R11', 'R0', 'R7']
+  Instruction counter: 24, JUMP [6]
+  Instruction counter: 25, SUB ['R9', 'R7', 'R10']
+  Instruction counter: 26, JZ [17]
+  Instruction counter: 27, MOD ['R7', 'R15', 'R10']
+  Instruction counter: 28, JZ [14]
+  Instruction counter: 29, ADD ['R6', 'R7', 'R11']
+  Instruction counter: 30, ADD ['R7', 'R0', 'R6']
+  Instruction counter: 31, ADD ['R11', 'R0', 'R7']
+  Instruction counter: 32, JUMP [6]
+  Instruction counter: 33, SUB ['R9', 'R7', 'R10']
+  Instruction counter: 34, JZ [17]
+  Instruction counter: 35, MOD ['R7', 'R15', 'R10']
+  Instruction counter: 36, JZ [14]
+  Instruction counter: 37, ADD ['R7', 'R8', 'R12']
+  Instruction counter: 38, ADD ['R12', 'R0', 'R8']
+  Instruction counter: 39, JUMP [10]
+  Instruction counter: 40, ADD ['R6', 'R7', 'R11']
+  Instruction counter: 41, ADD ['R7', 'R0', 'R6']
+  Instruction counter: 42, ADD ['R11', 'R0', 'R7']
+  Instruction counter: 43, JUMP [6]
+  Instruction counter: 44, SUB ['R9', 'R7', 'R10']
+  Instruction counter: 45, JZ [17]
+  Instruction counter: 46, MOD ['R7', 'R15', 'R10']
+  Instruction counter: 47, JZ [14]
+  Instruction counter: 48, ADD ['R6', 'R7', 'R11']
+  Instruction counter: 49, ADD ['R7', 'R0', 'R6']
+  Instruction counter: 50, ADD ['R11', 'R0', 'R7']
+  Instruction counter: 51, JUMP [6]
+  Instruction counter: 52, SUB ['R9', 'R7', 'R10']
+  Instruction counter: 53, JZ [17]
+  Instruction counter: 54, MOD ['R7', 'R15', 'R10']
+  Instruction counter: 55, JZ [14]
+  Instruction counter: 56, ADD ['R6', 'R7', 'R11']
+  Instruction counter: 57, ADD ['R7', 'R0', 'R6']
+  Instruction counter: 58, ADD ['R11', 'R0', 'R7']
+  Instruction counter: 59, JUMP [6]
+  Instruction counter: 60, SUB ['R9', 'R7', 'R10']
+  Instruction counter: 61, JZ [17]
+  Instruction counter: 62, MOD ['R7', 'R15', 'R10']
+  Instruction counter: 63, JZ [14]
+  Instruction counter: 64, ADD ['R7', 'R8', 'R12']
+  Instruction counter: 65, ADD ['R12', 'R0', 'R8']
+  Instruction counter: 66, JUMP [10]
+  Instruction counter: 67, ADD ['R6', 'R7', 'R11']
+  Instruction counter: 68, ADD ['R7', 'R0', 'R6']
+  Instruction counter: 69, ADD ['R11', 'R0', 'R7']
+  Instruction counter: 70, JUMP [6]
+  Instruction counter: 71, SUB ['R9', 'R7', 'R10']
+  Instruction counter: 72, JZ [17]
+  Instruction counter: 73, MOD ['R7', 'R15', 'R10']
+  Instruction counter: 74, JZ [14]
+  Instruction counter: 75, ADD ['R6', 'R7', 'R11']
+  Instruction counter: 76, ADD ['R7', 'R0', 'R6']
+  Instruction counter: 77, ADD ['R11', 'R0', 'R7']
+  Instruction counter: 78, JUMP [6]
+  Instruction counter: 79, SUB ['R9', 'R7', 'R10']
+  Instruction counter: 80, JZ [17]
+  Instruction counter: 81, MOD ['R7', 'R15', 'R10']
+  Instruction counter: 82, JZ [14]
+  Instruction counter: 83, ADD ['R6', 'R7', 'R11']
+  Instruction counter: 84, ADD ['R7', 'R0', 'R6']
+  Instruction counter: 85, ADD ['R11', 'R0', 'R7']
+  Instruction counter: 86, JUMP [6]
+  Instruction counter: 87, SUB ['R9', 'R7', 'R10']
+  Instruction counter: 88, JZ [17]
+  Instruction counter: 89, MOD ['R7', 'R15', 'R10']
+  Instruction counter: 90, JZ [14]
+  Instruction counter: 91, ADD ['R7', 'R8', 'R12']
+  Instruction counter: 92, ADD ['R12', 'R0', 'R8']
+  Instruction counter: 93, JUMP [10]
+  Instruction counter: 94, ADD ['R6', 'R7', 'R11']
+  Instruction counter: 95, ADD ['R7', 'R0', 'R6']
+  Instruction counter: 96, ADD ['R11', 'R0', 'R7']
+  Instruction counter: 97, JUMP [6]
+  Instruction counter: 98, SUB ['R9', 'R7', 'R10']
+  Instruction counter: 99, JZ [17]
+  Instruction counter: 100, MOD ['R7', 'R15', 'R10']
+  Instruction counter: 101, JZ [14]
+  Instruction counter: 102, ADD ['R6', 'R7', 'R11']
+  Instruction counter: 103, ADD ['R7', 'R0', 'R6']
+  Instruction counter: 104, ADD ['R11', 'R0', 'R7']
+  Instruction counter: 105, JUMP [6]
+  Instruction counter: 106, SUB ['R9', 'R7', 'R10']
+  Instruction counter: 107, JZ [17]
+  Instruction counter: 108, MOD ['R7', 'R15', 'R10']
+  Instruction counter: 109, JZ [14]
+  Instruction counter: 110, ADD ['R6', 'R7', 'R11']
+  Instruction counter: 111, ADD ['R7', 'R0', 'R6']
+  Instruction counter: 112, ADD ['R11', 'R0', 'R7']
+  Instruction counter: 113, JUMP [6]
+  Instruction counter: 114, SUB ['R9', 'R7', 'R10']
+  Instruction counter: 115, JZ [17]
+  Instruction counter: 116, MOD ['R7', 'R15', 'R10']
+  Instruction counter: 117, JZ [14]
+  Instruction counter: 118, ADD ['R7', 'R8', 'R12']
+  Instruction counter: 119, ADD ['R12', 'R0', 'R8']
+  Instruction counter: 120, JUMP [10]
+  Instruction counter: 121, ADD ['R6', 'R7', 'R11']
+  Instruction counter: 122, ADD ['R7', 'R0', 'R6']
+  Instruction counter: 123, ADD ['R11', 'R0', 'R7']
+  Instruction counter: 124, JUMP [6]
+  Instruction counter: 125, SUB ['R9', 'R7', 'R10']
+  Instruction counter: 126, JZ [17]
+  Instruction counter: 127, MOD ['R7', 'R15', 'R10']
+  Instruction counter: 128, JZ [14]
+  Instruction counter: 129, ADD ['R6', 'R7', 'R11']
+  Instruction counter: 130, ADD ['R7', 'R0', 'R6']
+  Instruction counter: 131, ADD ['R11', 'R0', 'R7']
+  Instruction counter: 132, JUMP [6]
+  Instruction counter: 133, SUB ['R9', 'R7', 'R10']
+  Instruction counter: 134, JZ [17]
+  Instruction counter: 135, MOD ['R7', 'R15', 'R10']
+  Instruction counter: 136, JZ [14]
+  Instruction counter: 137, ADD ['R6', 'R7', 'R11']
+  Instruction counter: 138, ADD ['R7', 'R0', 'R6']
+  Instruction counter: 139, ADD ['R11', 'R0', 'R7']
+  Instruction counter: 140, JUMP [6]
+  Instruction counter: 141, SUB ['R9', 'R7', 'R10']
+  Instruction counter: 142, JZ [17]
+  Instruction counter: 143, MOD ['R7', 'R15', 'R10']
+  Instruction counter: 144, JZ [14]
+  Instruction counter: 145, ADD ['R7', 'R8', 'R12']
+  Instruction counter: 146, ADD ['R12', 'R0', 'R8']
+  Instruction counter: 147, JUMP [10]
+  Instruction counter: 148, ADD ['R6', 'R7', 'R11']
+  Instruction counter: 149, ADD ['R7', 'R0', 'R6']
+  Instruction counter: 150, ADD ['R11', 'R0', 'R7']
+  Instruction counter: 151, JUMP [6]
+  Instruction counter: 152, SUB ['R9', 'R7', 'R10']
+  Instruction counter: 153, JZ [17]
+  Instruction counter: 154, MOD ['R7', 'R15', 'R10']
+  Instruction counter: 155, JZ [14]
+  Instruction counter: 156, ADD ['R6', 'R7', 'R11']
+  Instruction counter: 157, ADD ['R7', 'R0', 'R6']
+  Instruction counter: 158, ADD ['R11', 'R0', 'R7']
+  Instruction counter: 159, JUMP [6]
+  Instruction counter: 160, SUB ['R9', 'R7', 'R10']
+  Instruction counter: 161, JZ [17]
+  Instruction counter: 162, MOD ['R7', 'R15', 'R10']
+  Instruction counter: 163, JZ [14]
+  Instruction counter: 164, ADD ['R6', 'R7', 'R11']
+  Instruction counter: 165, ADD ['R7', 'R0', 'R6']
+  Instruction counter: 166, ADD ['R11', 'R0', 'R7']
+  Instruction counter: 167, JUMP [6]
+  Instruction counter: 168, SUB ['R9', 'R7', 'R10']
+  Instruction counter: 169, JZ [17]
+  Instruction counter: 170, MOD ['R7', 'R15', 'R10']
+  Instruction counter: 171, JZ [14]
+  Instruction counter: 172, ADD ['R7', 'R8', 'R12']
+  Instruction counter: 173, ADD ['R12', 'R0', 'R8']
+  Instruction counter: 174, JUMP [10]
+  Instruction counter: 175, ADD ['R6', 'R7', 'R11']
+  Instruction counter: 176, ADD ['R7', 'R0', 'R6']
+  Instruction counter: 177, ADD ['R11', 'R0', 'R7']
+  Instruction counter: 178, JUMP [6]
+  Instruction counter: 179, SUB ['R9', 'R7', 'R10']
+  Instruction counter: 180, JZ [17]
+  Instruction counter: 181, MOD ['R7', 'R15', 'R10']
+  Instruction counter: 182, JZ [14]
+  Instruction counter: 183, ADD ['R6', 'R7', 'R11']
+  Instruction counter: 184, ADD ['R7', 'R0', 'R6']
+  Instruction counter: 185, ADD ['R11', 'R0', 'R7']
+  Instruction counter: 186, JUMP [6]
+  Instruction counter: 187, SUB ['R9', 'R7', 'R10']
+  Instruction counter: 188, JZ [17]
+  Instruction counter: 189, MOD ['R7', 'R15', 'R10']
+  Instruction counter: 190, JZ [14]
+  Instruction counter: 191, ADD ['R6', 'R7', 'R11']
+  Instruction counter: 192, ADD ['R7', 'R0', 'R6']
+  Instruction counter: 193, ADD ['R11', 'R0', 'R7']
+  Instruction counter: 194, JUMP [6]
+  Instruction counter: 195, SUB ['R9', 'R7', 'R10']
+  Instruction counter: 196, JZ [17]
+  Instruction counter: 197, MOD ['R7', 'R15', 'R10']
+  Instruction counter: 198, JZ [14]
+  Instruction counter: 199, ADD ['R7', 'R8', 'R12']
+  Instruction counter: 200, ADD ['R12', 'R0', 'R8']
+  Instruction counter: 201, JUMP [10]
+  Instruction counter: 202, ADD ['R6', 'R7', 'R11']
+  Instruction counter: 203, ADD ['R7', 'R0', 'R6']
+  Instruction counter: 204, ADD ['R11', 'R0', 'R7']
+  Instruction counter: 205, JUMP [6]
+  Instruction counter: 206, SUB ['R9', 'R7', 'R10']
+  Instruction counter: 207, JZ [17]
+  Instruction counter: 208, MOD ['R7', 'R15', 'R10']
+  Instruction counter: 209, JZ [14]
+  Instruction counter: 210, ADD ['R6', 'R7', 'R11']
+  Instruction counter: 211, ADD ['R7', 'R0', 'R6']
+  Instruction counter: 212, ADD ['R11', 'R0', 'R7']
+  Instruction counter: 213, JUMP [6]
+  Instruction counter: 214, SUB ['R9', 'R7', 'R10']
+  Instruction counter: 215, JZ [17]
+  Instruction counter: 216, MOD ['R7', 'R15', 'R10']
+  Instruction counter: 217, JZ [14]
+  Instruction counter: 218, ADD ['R6', 'R7', 'R11']
+  Instruction counter: 219, ADD ['R7', 'R0', 'R6']
+  Instruction counter: 220, ADD ['R11', 'R0', 'R7']
+  Instruction counter: 221, JUMP [6]
+  Instruction counter: 222, SUB ['R9', 'R7', 'R10']
+  Instruction counter: 223, JZ [17]
+  Instruction counter: 224, MOD ['R7', 'R15', 'R10']
+  Instruction counter: 225, JZ [14]
+  Instruction counter: 226, ADD ['R7', 'R8', 'R12']
+  Instruction counter: 227, ADD ['R12', 'R0', 'R8']
+  Instruction counter: 228, JUMP [10]
+  Instruction counter: 229, ADD ['R6', 'R7', 'R11']
+  Instruction counter: 230, ADD ['R7', 'R0', 'R6']
+  Instruction counter: 231, ADD ['R11', 'R0', 'R7']
+  Instruction counter: 232, JUMP [6]
+  Instruction counter: 233, SUB ['R9', 'R7', 'R10']
+  Instruction counter: 234, JZ [17]
+  Instruction counter: 235, MOD ['R7', 'R15', 'R10']
+  Instruction counter: 236, JZ [14]
+  Instruction counter: 237, ADD ['R6', 'R7', 'R11']
+  Instruction counter: 238, ADD ['R7', 'R0', 'R6']
+  Instruction counter: 239, ADD ['R11', 'R0', 'R7']
+  Instruction counter: 240, JUMP [6]
+  Instruction counter: 241, SUB ['R9', 'R7', 'R10']
+  Instruction counter: 242, JZ [17]
+  Instruction counter: 243, MOD ['R7', 'R15', 'R10']
+  Instruction counter: 244, JZ [14]
+  Instruction counter: 245, ADD ['R6', 'R7', 'R11']
+  Instruction counter: 246, ADD ['R7', 'R0', 'R6']
+  Instruction counter: 247, ADD ['R11', 'R0', 'R7']
+  Instruction counter: 248, JUMP [6]
+  Instruction counter: 249, SUB ['R9', 'R7', 'R10']
+  Instruction counter: 250, JZ [17]
+  Instruction counter: 251, MOD ['R7', 'R15', 'R10']
+  Instruction counter: 252, JZ [14]
+  Instruction counter: 253, ADD ['R7', 'R8', 'R12']
+  Instruction counter: 254, ADD ['R12', 'R0', 'R8']
+  Instruction counter: 255, JUMP [10]
+  Instruction counter: 256, ADD ['R6', 'R7', 'R11']
+  Instruction counter: 257, ADD ['R7', 'R0', 'R6']
+  Instruction counter: 258, ADD ['R11', 'R0', 'R7']
+  Instruction counter: 259, JUMP [6]
+  Instruction counter: 260, SUB ['R9', 'R7', 'R10']
+  Instruction counter: 261, JZ [17]
+  Instruction counter: 262, MOD ['R7', 'R15', 'R10']
+  Instruction counter: 263, JZ [14]
+  Instruction counter: 264, ADD ['R6', 'R7', 'R11']
+  Instruction counter: 265, ADD ['R7', 'R0', 'R6']
+  Instruction counter: 266, ADD ['R11', 'R0', 'R7']
+  Instruction counter: 267, JUMP [6]
+  Instruction counter: 268, SUB ['R9', 'R7', 'R10']
+  Instruction counter: 269, JZ [17]
+  Instruction counter: 270, MOD ['R7', 'R15', 'R10']
+  Instruction counter: 271, JZ [14]
+  Instruction counter: 272, ADD ['R6', 'R7', 'R11']
+  Instruction counter: 273, ADD ['R7', 'R0', 'R6']
+  Instruction counter: 274, ADD ['R11', 'R0', 'R7']
+  Instruction counter: 275, JUMP [6]
+  Instruction counter: 276, SUB ['R9', 'R7', 'R10']
+  Instruction counter: 277, JZ [17]
+  Instruction counter: 278, MOD ['R7', 'R15', 'R10']
+  Instruction counter: 279, JZ [14]
+  Instruction counter: 280, ADD ['R7', 'R8', 'R12']
+  Instruction counter: 281, ADD ['R12', 'R0', 'R8']
+  Instruction counter: 282, JUMP [10]
+  Instruction counter: 283, ADD ['R6', 'R7', 'R11']
+  Instruction counter: 284, ADD ['R7', 'R0', 'R6']
+  Instruction counter: 285, ADD ['R11', 'R0', 'R7']
+  Instruction counter: 286, JUMP [6]
+  Instruction counter: 287, SUB ['R9', 'R7', 'R10']
+  Instruction counter: 288, JZ [17]
+  Instruction counter: 289, WRITE_PORT ['R12']
+  Instruction counter: 290, NOP []
+out_stdout: '4613732'
 out_log: |
-  DEBUG:translator:Start translation...
-  DEBUG:machine:Running program...
+  DEBUG    root:machine.py:234 LOADMEMORY ['fib1', 'R6'] {PC: 0, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: , REG7: , REG8: , REG9: , REG10: , REG11: , REG12: , REG13: , REG14: , REG15: , OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 LOADMEMORY ['fib2', 'R7'] {PC: 1, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 1, REG7: , REG8: , REG9: , REG10: , REG11: , REG12: , REG13: , REG14: , REG15: , OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 LOADMEMORY ['fib2', 'R15'] {PC: 2, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 1, REG7: 2, REG8: , REG9: , REG10: , REG11: , REG12: , REG13: , REG14: , REG15: , OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 LOADMEMORY ['zero', 'R14'] {PC: 3, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 1, REG7: 2, REG8: , REG9: , REG10: , REG11: , REG12: , REG13: , REG14: , REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 LOADMEMORY ['max_limit', 'R9'] {PC: 4, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 1, REG7: 2, REG8: , REG9: , REG10: , REG11: , REG12: , REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R0', 'R14', 'R8'] {PC: 5, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 1, REG7: 2, REG8: , REG9: 4000000, REG10: , REG11: , REG12: , REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 SUB ['R9', 'R7', 'R10'] {PC: 6, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 1, REG7: 2, REG8: 0, REG9: 4000000, REG10: , REG11: , REG12: , REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [17] {PC: 7, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 1, REG7: 2, REG8: 0, REG9: 4000000, REG10: 3999998, REG11: , REG12: , REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 MOD ['R7', 'R15', 'R10'] {PC: 8, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 1, REG7: 2, REG8: 0, REG9: 4000000, REG10: 3999998, REG11: , REG12: , REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [14] {PC: 9, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 1, REG7: 2, REG8: 0, REG9: 4000000, REG10: 0, REG11: , REG12: , REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R8', 'R12'] {PC: 14, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 1, REG7: 2, REG8: 0, REG9: 4000000, REG10: 0, REG11: , REG12: , REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R12', 'R0', 'R8'] {PC: 15, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 1, REG7: 2, REG8: 0, REG9: 4000000, REG10: 0, REG11: , REG12: 2, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [10] {PC: 16, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 1, REG7: 2, REG8: 2, REG9: 4000000, REG10: 0, REG11: , REG12: 2, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R6', 'R7', 'R11'] {PC: 10, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 1, REG7: 2, REG8: 2, REG9: 4000000, REG10: 0, REG11: , REG12: 2, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R0', 'R6'] {PC: 11, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 1, REG7: 2, REG8: 2, REG9: 4000000, REG10: 0, REG11: 3, REG12: 2, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R11', 'R0', 'R7'] {PC: 12, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 2, REG7: 2, REG8: 2, REG9: 4000000, REG10: 0, REG11: 3, REG12: 2, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [6] {PC: 13, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 2, REG7: 3, REG8: 2, REG9: 4000000, REG10: 0, REG11: 3, REG12: 2, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 SUB ['R9', 'R7', 'R10'] {PC: 6, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 2, REG7: 3, REG8: 2, REG9: 4000000, REG10: 0, REG11: 3, REG12: 2, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [17] {PC: 7, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 2, REG7: 3, REG8: 2, REG9: 4000000, REG10: 3999997, REG11: 3, REG12: 2, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 MOD ['R7', 'R15', 'R10'] {PC: 8, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 2, REG7: 3, REG8: 2, REG9: 4000000, REG10: 3999997, REG11: 3, REG12: 2, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [14] {PC: 9, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 2, REG7: 3, REG8: 2, REG9: 4000000, REG10: 1, REG11: 3, REG12: 2, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R6', 'R7', 'R11'] {PC: 10, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 2, REG7: 3, REG8: 2, REG9: 4000000, REG10: 1, REG11: 3, REG12: 2, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R0', 'R6'] {PC: 11, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 2, REG7: 3, REG8: 2, REG9: 4000000, REG10: 1, REG11: 5, REG12: 2, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R11', 'R0', 'R7'] {PC: 12, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 3, REG7: 3, REG8: 2, REG9: 4000000, REG10: 1, REG11: 5, REG12: 2, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [6] {PC: 13, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 3, REG7: 5, REG8: 2, REG9: 4000000, REG10: 1, REG11: 5, REG12: 2, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 SUB ['R9', 'R7', 'R10'] {PC: 6, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 3, REG7: 5, REG8: 2, REG9: 4000000, REG10: 1, REG11: 5, REG12: 2, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [17] {PC: 7, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 3, REG7: 5, REG8: 2, REG9: 4000000, REG10: 3999995, REG11: 5, REG12: 2, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 MOD ['R7', 'R15', 'R10'] {PC: 8, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 3, REG7: 5, REG8: 2, REG9: 4000000, REG10: 3999995, REG11: 5, REG12: 2, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [14] {PC: 9, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 3, REG7: 5, REG8: 2, REG9: 4000000, REG10: 1, REG11: 5, REG12: 2, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R6', 'R7', 'R11'] {PC: 10, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 3, REG7: 5, REG8: 2, REG9: 4000000, REG10: 1, REG11: 5, REG12: 2, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R0', 'R6'] {PC: 11, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 3, REG7: 5, REG8: 2, REG9: 4000000, REG10: 1, REG11: 8, REG12: 2, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R11', 'R0', 'R7'] {PC: 12, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 5, REG7: 5, REG8: 2, REG9: 4000000, REG10: 1, REG11: 8, REG12: 2, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [6] {PC: 13, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 5, REG7: 8, REG8: 2, REG9: 4000000, REG10: 1, REG11: 8, REG12: 2, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 SUB ['R9', 'R7', 'R10'] {PC: 6, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 5, REG7: 8, REG8: 2, REG9: 4000000, REG10: 1, REG11: 8, REG12: 2, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [17] {PC: 7, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 5, REG7: 8, REG8: 2, REG9: 4000000, REG10: 3999992, REG11: 8, REG12: 2, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 MOD ['R7', 'R15', 'R10'] {PC: 8, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 5, REG7: 8, REG8: 2, REG9: 4000000, REG10: 3999992, REG11: 8, REG12: 2, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [14] {PC: 9, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 5, REG7: 8, REG8: 2, REG9: 4000000, REG10: 0, REG11: 8, REG12: 2, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R8', 'R12'] {PC: 14, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 5, REG7: 8, REG8: 2, REG9: 4000000, REG10: 0, REG11: 8, REG12: 2, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R12', 'R0', 'R8'] {PC: 15, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 5, REG7: 8, REG8: 2, REG9: 4000000, REG10: 0, REG11: 8, REG12: 10, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [10] {PC: 16, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 5, REG7: 8, REG8: 10, REG9: 4000000, REG10: 0, REG11: 8, REG12: 10, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R6', 'R7', 'R11'] {PC: 10, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 5, REG7: 8, REG8: 10, REG9: 4000000, REG10: 0, REG11: 8, REG12: 10, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R0', 'R6'] {PC: 11, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 5, REG7: 8, REG8: 10, REG9: 4000000, REG10: 0, REG11: 13, REG12: 10, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R11', 'R0', 'R7'] {PC: 12, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 8, REG7: 8, REG8: 10, REG9: 4000000, REG10: 0, REG11: 13, REG12: 10, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [6] {PC: 13, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 8, REG7: 13, REG8: 10, REG9: 4000000, REG10: 0, REG11: 13, REG12: 10, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 SUB ['R9', 'R7', 'R10'] {PC: 6, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 8, REG7: 13, REG8: 10, REG9: 4000000, REG10: 0, REG11: 13, REG12: 10, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [17] {PC: 7, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 8, REG7: 13, REG8: 10, REG9: 4000000, REG10: 3999987, REG11: 13, REG12: 10, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 MOD ['R7', 'R15', 'R10'] {PC: 8, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 8, REG7: 13, REG8: 10, REG9: 4000000, REG10: 3999987, REG11: 13, REG12: 10, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [14] {PC: 9, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 8, REG7: 13, REG8: 10, REG9: 4000000, REG10: 1, REG11: 13, REG12: 10, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R6', 'R7', 'R11'] {PC: 10, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 8, REG7: 13, REG8: 10, REG9: 4000000, REG10: 1, REG11: 13, REG12: 10, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R0', 'R6'] {PC: 11, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 8, REG7: 13, REG8: 10, REG9: 4000000, REG10: 1, REG11: 21, REG12: 10, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R11', 'R0', 'R7'] {PC: 12, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 13, REG7: 13, REG8: 10, REG9: 4000000, REG10: 1, REG11: 21, REG12: 10, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [6] {PC: 13, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 13, REG7: 21, REG8: 10, REG9: 4000000, REG10: 1, REG11: 21, REG12: 10, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 SUB ['R9', 'R7', 'R10'] {PC: 6, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 13, REG7: 21, REG8: 10, REG9: 4000000, REG10: 1, REG11: 21, REG12: 10, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [17] {PC: 7, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 13, REG7: 21, REG8: 10, REG9: 4000000, REG10: 3999979, REG11: 21, REG12: 10, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 MOD ['R7', 'R15', 'R10'] {PC: 8, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 13, REG7: 21, REG8: 10, REG9: 4000000, REG10: 3999979, REG11: 21, REG12: 10, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [14] {PC: 9, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 13, REG7: 21, REG8: 10, REG9: 4000000, REG10: 1, REG11: 21, REG12: 10, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R6', 'R7', 'R11'] {PC: 10, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 13, REG7: 21, REG8: 10, REG9: 4000000, REG10: 1, REG11: 21, REG12: 10, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R0', 'R6'] {PC: 11, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 13, REG7: 21, REG8: 10, REG9: 4000000, REG10: 1, REG11: 34, REG12: 10, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R11', 'R0', 'R7'] {PC: 12, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 21, REG7: 21, REG8: 10, REG9: 4000000, REG10: 1, REG11: 34, REG12: 10, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [6] {PC: 13, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 21, REG7: 34, REG8: 10, REG9: 4000000, REG10: 1, REG11: 34, REG12: 10, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 SUB ['R9', 'R7', 'R10'] {PC: 6, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 21, REG7: 34, REG8: 10, REG9: 4000000, REG10: 1, REG11: 34, REG12: 10, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [17] {PC: 7, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 21, REG7: 34, REG8: 10, REG9: 4000000, REG10: 3999966, REG11: 34, REG12: 10, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 MOD ['R7', 'R15', 'R10'] {PC: 8, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 21, REG7: 34, REG8: 10, REG9: 4000000, REG10: 3999966, REG11: 34, REG12: 10, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [14] {PC: 9, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 21, REG7: 34, REG8: 10, REG9: 4000000, REG10: 0, REG11: 34, REG12: 10, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R8', 'R12'] {PC: 14, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 21, REG7: 34, REG8: 10, REG9: 4000000, REG10: 0, REG11: 34, REG12: 10, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R12', 'R0', 'R8'] {PC: 15, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 21, REG7: 34, REG8: 10, REG9: 4000000, REG10: 0, REG11: 34, REG12: 44, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [10] {PC: 16, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 21, REG7: 34, REG8: 44, REG9: 4000000, REG10: 0, REG11: 34, REG12: 44, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R6', 'R7', 'R11'] {PC: 10, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 21, REG7: 34, REG8: 44, REG9: 4000000, REG10: 0, REG11: 34, REG12: 44, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R0', 'R6'] {PC: 11, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 21, REG7: 34, REG8: 44, REG9: 4000000, REG10: 0, REG11: 55, REG12: 44, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R11', 'R0', 'R7'] {PC: 12, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 34, REG7: 34, REG8: 44, REG9: 4000000, REG10: 0, REG11: 55, REG12: 44, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [6] {PC: 13, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 34, REG7: 55, REG8: 44, REG9: 4000000, REG10: 0, REG11: 55, REG12: 44, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 SUB ['R9', 'R7', 'R10'] {PC: 6, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 34, REG7: 55, REG8: 44, REG9: 4000000, REG10: 0, REG11: 55, REG12: 44, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [17] {PC: 7, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 34, REG7: 55, REG8: 44, REG9: 4000000, REG10: 3999945, REG11: 55, REG12: 44, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 MOD ['R7', 'R15', 'R10'] {PC: 8, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 34, REG7: 55, REG8: 44, REG9: 4000000, REG10: 3999945, REG11: 55, REG12: 44, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [14] {PC: 9, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 34, REG7: 55, REG8: 44, REG9: 4000000, REG10: 1, REG11: 55, REG12: 44, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R6', 'R7', 'R11'] {PC: 10, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 34, REG7: 55, REG8: 44, REG9: 4000000, REG10: 1, REG11: 55, REG12: 44, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R0', 'R6'] {PC: 11, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 34, REG7: 55, REG8: 44, REG9: 4000000, REG10: 1, REG11: 89, REG12: 44, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R11', 'R0', 'R7'] {PC: 12, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 55, REG7: 55, REG8: 44, REG9: 4000000, REG10: 1, REG11: 89, REG12: 44, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [6] {PC: 13, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 55, REG7: 89, REG8: 44, REG9: 4000000, REG10: 1, REG11: 89, REG12: 44, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 SUB ['R9', 'R7', 'R10'] {PC: 6, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 55, REG7: 89, REG8: 44, REG9: 4000000, REG10: 1, REG11: 89, REG12: 44, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [17] {PC: 7, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 55, REG7: 89, REG8: 44, REG9: 4000000, REG10: 3999911, REG11: 89, REG12: 44, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 MOD ['R7', 'R15', 'R10'] {PC: 8, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 55, REG7: 89, REG8: 44, REG9: 4000000, REG10: 3999911, REG11: 89, REG12: 44, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [14] {PC: 9, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 55, REG7: 89, REG8: 44, REG9: 4000000, REG10: 1, REG11: 89, REG12: 44, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R6', 'R7', 'R11'] {PC: 10, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 55, REG7: 89, REG8: 44, REG9: 4000000, REG10: 1, REG11: 89, REG12: 44, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R0', 'R6'] {PC: 11, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 55, REG7: 89, REG8: 44, REG9: 4000000, REG10: 1, REG11: 144, REG12: 44, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R11', 'R0', 'R7'] {PC: 12, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 89, REG7: 89, REG8: 44, REG9: 4000000, REG10: 1, REG11: 144, REG12: 44, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [6] {PC: 13, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 89, REG7: 144, REG8: 44, REG9: 4000000, REG10: 1, REG11: 144, REG12: 44, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 SUB ['R9', 'R7', 'R10'] {PC: 6, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 89, REG7: 144, REG8: 44, REG9: 4000000, REG10: 1, REG11: 144, REG12: 44, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [17] {PC: 7, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 89, REG7: 144, REG8: 44, REG9: 4000000, REG10: 3999856, REG11: 144, REG12: 44, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 MOD ['R7', 'R15', 'R10'] {PC: 8, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 89, REG7: 144, REG8: 44, REG9: 4000000, REG10: 3999856, REG11: 144, REG12: 44, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [14] {PC: 9, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 89, REG7: 144, REG8: 44, REG9: 4000000, REG10: 0, REG11: 144, REG12: 44, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R8', 'R12'] {PC: 14, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 89, REG7: 144, REG8: 44, REG9: 4000000, REG10: 0, REG11: 144, REG12: 44, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R12', 'R0', 'R8'] {PC: 15, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 89, REG7: 144, REG8: 44, REG9: 4000000, REG10: 0, REG11: 144, REG12: 188, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [10] {PC: 16, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 89, REG7: 144, REG8: 188, REG9: 4000000, REG10: 0, REG11: 144, REG12: 188, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R6', 'R7', 'R11'] {PC: 10, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 89, REG7: 144, REG8: 188, REG9: 4000000, REG10: 0, REG11: 144, REG12: 188, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R0', 'R6'] {PC: 11, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 89, REG7: 144, REG8: 188, REG9: 4000000, REG10: 0, REG11: 233, REG12: 188, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R11', 'R0', 'R7'] {PC: 12, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 144, REG7: 144, REG8: 188, REG9: 4000000, REG10: 0, REG11: 233, REG12: 188, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [6] {PC: 13, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 144, REG7: 233, REG8: 188, REG9: 4000000, REG10: 0, REG11: 233, REG12: 188, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 SUB ['R9', 'R7', 'R10'] {PC: 6, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 144, REG7: 233, REG8: 188, REG9: 4000000, REG10: 0, REG11: 233, REG12: 188, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [17] {PC: 7, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 144, REG7: 233, REG8: 188, REG9: 4000000, REG10: 3999767, REG11: 233, REG12: 188, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 MOD ['R7', 'R15', 'R10'] {PC: 8, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 144, REG7: 233, REG8: 188, REG9: 4000000, REG10: 3999767, REG11: 233, REG12: 188, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [14] {PC: 9, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 144, REG7: 233, REG8: 188, REG9: 4000000, REG10: 1, REG11: 233, REG12: 188, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R6', 'R7', 'R11'] {PC: 10, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 144, REG7: 233, REG8: 188, REG9: 4000000, REG10: 1, REG11: 233, REG12: 188, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R0', 'R6'] {PC: 11, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 144, REG7: 233, REG8: 188, REG9: 4000000, REG10: 1, REG11: 377, REG12: 188, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R11', 'R0', 'R7'] {PC: 12, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 233, REG7: 233, REG8: 188, REG9: 4000000, REG10: 1, REG11: 377, REG12: 188, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [6] {PC: 13, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 233, REG7: 377, REG8: 188, REG9: 4000000, REG10: 1, REG11: 377, REG12: 188, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 SUB ['R9', 'R7', 'R10'] {PC: 6, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 233, REG7: 377, REG8: 188, REG9: 4000000, REG10: 1, REG11: 377, REG12: 188, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [17] {PC: 7, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 233, REG7: 377, REG8: 188, REG9: 4000000, REG10: 3999623, REG11: 377, REG12: 188, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 MOD ['R7', 'R15', 'R10'] {PC: 8, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 233, REG7: 377, REG8: 188, REG9: 4000000, REG10: 3999623, REG11: 377, REG12: 188, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [14] {PC: 9, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 233, REG7: 377, REG8: 188, REG9: 4000000, REG10: 1, REG11: 377, REG12: 188, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R6', 'R7', 'R11'] {PC: 10, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 233, REG7: 377, REG8: 188, REG9: 4000000, REG10: 1, REG11: 377, REG12: 188, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R0', 'R6'] {PC: 11, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 233, REG7: 377, REG8: 188, REG9: 4000000, REG10: 1, REG11: 610, REG12: 188, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R11', 'R0', 'R7'] {PC: 12, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 377, REG7: 377, REG8: 188, REG9: 4000000, REG10: 1, REG11: 610, REG12: 188, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [6] {PC: 13, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 377, REG7: 610, REG8: 188, REG9: 4000000, REG10: 1, REG11: 610, REG12: 188, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 SUB ['R9', 'R7', 'R10'] {PC: 6, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 377, REG7: 610, REG8: 188, REG9: 4000000, REG10: 1, REG11: 610, REG12: 188, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [17] {PC: 7, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 377, REG7: 610, REG8: 188, REG9: 4000000, REG10: 3999390, REG11: 610, REG12: 188, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 MOD ['R7', 'R15', 'R10'] {PC: 8, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 377, REG7: 610, REG8: 188, REG9: 4000000, REG10: 3999390, REG11: 610, REG12: 188, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [14] {PC: 9, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 377, REG7: 610, REG8: 188, REG9: 4000000, REG10: 0, REG11: 610, REG12: 188, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R8', 'R12'] {PC: 14, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 377, REG7: 610, REG8: 188, REG9: 4000000, REG10: 0, REG11: 610, REG12: 188, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R12', 'R0', 'R8'] {PC: 15, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 377, REG7: 610, REG8: 188, REG9: 4000000, REG10: 0, REG11: 610, REG12: 798, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [10] {PC: 16, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 377, REG7: 610, REG8: 798, REG9: 4000000, REG10: 0, REG11: 610, REG12: 798, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R6', 'R7', 'R11'] {PC: 10, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 377, REG7: 610, REG8: 798, REG9: 4000000, REG10: 0, REG11: 610, REG12: 798, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R0', 'R6'] {PC: 11, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 377, REG7: 610, REG8: 798, REG9: 4000000, REG10: 0, REG11: 987, REG12: 798, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R11', 'R0', 'R7'] {PC: 12, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 610, REG7: 610, REG8: 798, REG9: 4000000, REG10: 0, REG11: 987, REG12: 798, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [6] {PC: 13, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 610, REG7: 987, REG8: 798, REG9: 4000000, REG10: 0, REG11: 987, REG12: 798, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 SUB ['R9', 'R7', 'R10'] {PC: 6, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 610, REG7: 987, REG8: 798, REG9: 4000000, REG10: 0, REG11: 987, REG12: 798, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [17] {PC: 7, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 610, REG7: 987, REG8: 798, REG9: 4000000, REG10: 3999013, REG11: 987, REG12: 798, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 MOD ['R7', 'R15', 'R10'] {PC: 8, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 610, REG7: 987, REG8: 798, REG9: 4000000, REG10: 3999013, REG11: 987, REG12: 798, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [14] {PC: 9, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 610, REG7: 987, REG8: 798, REG9: 4000000, REG10: 1, REG11: 987, REG12: 798, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R6', 'R7', 'R11'] {PC: 10, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 610, REG7: 987, REG8: 798, REG9: 4000000, REG10: 1, REG11: 987, REG12: 798, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R0', 'R6'] {PC: 11, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 610, REG7: 987, REG8: 798, REG9: 4000000, REG10: 1, REG11: 1597, REG12: 798, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R11', 'R0', 'R7'] {PC: 12, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 987, REG7: 987, REG8: 798, REG9: 4000000, REG10: 1, REG11: 1597, REG12: 798, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [6] {PC: 13, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 987, REG7: 1597, REG8: 798, REG9: 4000000, REG10: 1, REG11: 1597, REG12: 798, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 SUB ['R9', 'R7', 'R10'] {PC: 6, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 987, REG7: 1597, REG8: 798, REG9: 4000000, REG10: 1, REG11: 1597, REG12: 798, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [17] {PC: 7, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 987, REG7: 1597, REG8: 798, REG9: 4000000, REG10: 3998403, REG11: 1597, REG12: 798, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 MOD ['R7', 'R15', 'R10'] {PC: 8, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 987, REG7: 1597, REG8: 798, REG9: 4000000, REG10: 3998403, REG11: 1597, REG12: 798, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [14] {PC: 9, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 987, REG7: 1597, REG8: 798, REG9: 4000000, REG10: 1, REG11: 1597, REG12: 798, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R6', 'R7', 'R11'] {PC: 10, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 987, REG7: 1597, REG8: 798, REG9: 4000000, REG10: 1, REG11: 1597, REG12: 798, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R0', 'R6'] {PC: 11, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 987, REG7: 1597, REG8: 798, REG9: 4000000, REG10: 1, REG11: 2584, REG12: 798, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R11', 'R0', 'R7'] {PC: 12, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 1597, REG7: 1597, REG8: 798, REG9: 4000000, REG10: 1, REG11: 2584, REG12: 798, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [6] {PC: 13, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 1597, REG7: 2584, REG8: 798, REG9: 4000000, REG10: 1, REG11: 2584, REG12: 798, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 SUB ['R9', 'R7', 'R10'] {PC: 6, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 1597, REG7: 2584, REG8: 798, REG9: 4000000, REG10: 1, REG11: 2584, REG12: 798, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [17] {PC: 7, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 1597, REG7: 2584, REG8: 798, REG9: 4000000, REG10: 3997416, REG11: 2584, REG12: 798, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 MOD ['R7', 'R15', 'R10'] {PC: 8, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 1597, REG7: 2584, REG8: 798, REG9: 4000000, REG10: 3997416, REG11: 2584, REG12: 798, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [14] {PC: 9, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 1597, REG7: 2584, REG8: 798, REG9: 4000000, REG10: 0, REG11: 2584, REG12: 798, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R8', 'R12'] {PC: 14, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 1597, REG7: 2584, REG8: 798, REG9: 4000000, REG10: 0, REG11: 2584, REG12: 798, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R12', 'R0', 'R8'] {PC: 15, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 1597, REG7: 2584, REG8: 798, REG9: 4000000, REG10: 0, REG11: 2584, REG12: 3382, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [10] {PC: 16, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 1597, REG7: 2584, REG8: 3382, REG9: 4000000, REG10: 0, REG11: 2584, REG12: 3382, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R6', 'R7', 'R11'] {PC: 10, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 1597, REG7: 2584, REG8: 3382, REG9: 4000000, REG10: 0, REG11: 2584, REG12: 3382, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R0', 'R6'] {PC: 11, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 1597, REG7: 2584, REG8: 3382, REG9: 4000000, REG10: 0, REG11: 4181, REG12: 3382, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R11', 'R0', 'R7'] {PC: 12, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 2584, REG7: 2584, REG8: 3382, REG9: 4000000, REG10: 0, REG11: 4181, REG12: 3382, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [6] {PC: 13, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 2584, REG7: 4181, REG8: 3382, REG9: 4000000, REG10: 0, REG11: 4181, REG12: 3382, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 SUB ['R9', 'R7', 'R10'] {PC: 6, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 2584, REG7: 4181, REG8: 3382, REG9: 4000000, REG10: 0, REG11: 4181, REG12: 3382, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [17] {PC: 7, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 2584, REG7: 4181, REG8: 3382, REG9: 4000000, REG10: 3995819, REG11: 4181, REG12: 3382, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 MOD ['R7', 'R15', 'R10'] {PC: 8, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 2584, REG7: 4181, REG8: 3382, REG9: 4000000, REG10: 3995819, REG11: 4181, REG12: 3382, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [14] {PC: 9, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 2584, REG7: 4181, REG8: 3382, REG9: 4000000, REG10: 1, REG11: 4181, REG12: 3382, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R6', 'R7', 'R11'] {PC: 10, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 2584, REG7: 4181, REG8: 3382, REG9: 4000000, REG10: 1, REG11: 4181, REG12: 3382, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R0', 'R6'] {PC: 11, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 2584, REG7: 4181, REG8: 3382, REG9: 4000000, REG10: 1, REG11: 6765, REG12: 3382, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R11', 'R0', 'R7'] {PC: 12, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 4181, REG7: 4181, REG8: 3382, REG9: 4000000, REG10: 1, REG11: 6765, REG12: 3382, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [6] {PC: 13, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 4181, REG7: 6765, REG8: 3382, REG9: 4000000, REG10: 1, REG11: 6765, REG12: 3382, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 SUB ['R9', 'R7', 'R10'] {PC: 6, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 4181, REG7: 6765, REG8: 3382, REG9: 4000000, REG10: 1, REG11: 6765, REG12: 3382, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [17] {PC: 7, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 4181, REG7: 6765, REG8: 3382, REG9: 4000000, REG10: 3993235, REG11: 6765, REG12: 3382, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 MOD ['R7', 'R15', 'R10'] {PC: 8, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 4181, REG7: 6765, REG8: 3382, REG9: 4000000, REG10: 3993235, REG11: 6765, REG12: 3382, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [14] {PC: 9, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 4181, REG7: 6765, REG8: 3382, REG9: 4000000, REG10: 1, REG11: 6765, REG12: 3382, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R6', 'R7', 'R11'] {PC: 10, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 4181, REG7: 6765, REG8: 3382, REG9: 4000000, REG10: 1, REG11: 6765, REG12: 3382, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R0', 'R6'] {PC: 11, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 4181, REG7: 6765, REG8: 3382, REG9: 4000000, REG10: 1, REG11: 10946, REG12: 3382, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R11', 'R0', 'R7'] {PC: 12, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 6765, REG7: 6765, REG8: 3382, REG9: 4000000, REG10: 1, REG11: 10946, REG12: 3382, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [6] {PC: 13, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 6765, REG7: 10946, REG8: 3382, REG9: 4000000, REG10: 1, REG11: 10946, REG12: 3382, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 SUB ['R9', 'R7', 'R10'] {PC: 6, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 6765, REG7: 10946, REG8: 3382, REG9: 4000000, REG10: 1, REG11: 10946, REG12: 3382, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [17] {PC: 7, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 6765, REG7: 10946, REG8: 3382, REG9: 4000000, REG10: 3989054, REG11: 10946, REG12: 3382, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 MOD ['R7', 'R15', 'R10'] {PC: 8, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 6765, REG7: 10946, REG8: 3382, REG9: 4000000, REG10: 3989054, REG11: 10946, REG12: 3382, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [14] {PC: 9, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 6765, REG7: 10946, REG8: 3382, REG9: 4000000, REG10: 0, REG11: 10946, REG12: 3382, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R8', 'R12'] {PC: 14, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 6765, REG7: 10946, REG8: 3382, REG9: 4000000, REG10: 0, REG11: 10946, REG12: 3382, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R12', 'R0', 'R8'] {PC: 15, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 6765, REG7: 10946, REG8: 3382, REG9: 4000000, REG10: 0, REG11: 10946, REG12: 14328, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [10] {PC: 16, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 6765, REG7: 10946, REG8: 14328, REG9: 4000000, REG10: 0, REG11: 10946, REG12: 14328, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R6', 'R7', 'R11'] {PC: 10, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 6765, REG7: 10946, REG8: 14328, REG9: 4000000, REG10: 0, REG11: 10946, REG12: 14328, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R0', 'R6'] {PC: 11, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 6765, REG7: 10946, REG8: 14328, REG9: 4000000, REG10: 0, REG11: 17711, REG12: 14328, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R11', 'R0', 'R7'] {PC: 12, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 10946, REG7: 10946, REG8: 14328, REG9: 4000000, REG10: 0, REG11: 17711, REG12: 14328, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [6] {PC: 13, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 10946, REG7: 17711, REG8: 14328, REG9: 4000000, REG10: 0, REG11: 17711, REG12: 14328, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 SUB ['R9', 'R7', 'R10'] {PC: 6, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 10946, REG7: 17711, REG8: 14328, REG9: 4000000, REG10: 0, REG11: 17711, REG12: 14328, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [17] {PC: 7, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 10946, REG7: 17711, REG8: 14328, REG9: 4000000, REG10: 3982289, REG11: 17711, REG12: 14328, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 MOD ['R7', 'R15', 'R10'] {PC: 8, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 10946, REG7: 17711, REG8: 14328, REG9: 4000000, REG10: 3982289, REG11: 17711, REG12: 14328, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [14] {PC: 9, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 10946, REG7: 17711, REG8: 14328, REG9: 4000000, REG10: 1, REG11: 17711, REG12: 14328, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R6', 'R7', 'R11'] {PC: 10, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 10946, REG7: 17711, REG8: 14328, REG9: 4000000, REG10: 1, REG11: 17711, REG12: 14328, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R0', 'R6'] {PC: 11, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 10946, REG7: 17711, REG8: 14328, REG9: 4000000, REG10: 1, REG11: 28657, REG12: 14328, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R11', 'R0', 'R7'] {PC: 12, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 17711, REG7: 17711, REG8: 14328, REG9: 4000000, REG10: 1, REG11: 28657, REG12: 14328, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [6] {PC: 13, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 17711, REG7: 28657, REG8: 14328, REG9: 4000000, REG10: 1, REG11: 28657, REG12: 14328, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 SUB ['R9', 'R7', 'R10'] {PC: 6, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 17711, REG7: 28657, REG8: 14328, REG9: 4000000, REG10: 1, REG11: 28657, REG12: 14328, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [17] {PC: 7, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 17711, REG7: 28657, REG8: 14328, REG9: 4000000, REG10: 3971343, REG11: 28657, REG12: 14328, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 MOD ['R7', 'R15', 'R10'] {PC: 8, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 17711, REG7: 28657, REG8: 14328, REG9: 4000000, REG10: 3971343, REG11: 28657, REG12: 14328, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [14] {PC: 9, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 17711, REG7: 28657, REG8: 14328, REG9: 4000000, REG10: 1, REG11: 28657, REG12: 14328, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R6', 'R7', 'R11'] {PC: 10, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 17711, REG7: 28657, REG8: 14328, REG9: 4000000, REG10: 1, REG11: 28657, REG12: 14328, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R0', 'R6'] {PC: 11, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 17711, REG7: 28657, REG8: 14328, REG9: 4000000, REG10: 1, REG11: 46368, REG12: 14328, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R11', 'R0', 'R7'] {PC: 12, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 28657, REG7: 28657, REG8: 14328, REG9: 4000000, REG10: 1, REG11: 46368, REG12: 14328, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [6] {PC: 13, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 28657, REG7: 46368, REG8: 14328, REG9: 4000000, REG10: 1, REG11: 46368, REG12: 14328, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 SUB ['R9', 'R7', 'R10'] {PC: 6, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 28657, REG7: 46368, REG8: 14328, REG9: 4000000, REG10: 1, REG11: 46368, REG12: 14328, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [17] {PC: 7, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 28657, REG7: 46368, REG8: 14328, REG9: 4000000, REG10: 3953632, REG11: 46368, REG12: 14328, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 MOD ['R7', 'R15', 'R10'] {PC: 8, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 28657, REG7: 46368, REG8: 14328, REG9: 4000000, REG10: 3953632, REG11: 46368, REG12: 14328, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [14] {PC: 9, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 28657, REG7: 46368, REG8: 14328, REG9: 4000000, REG10: 0, REG11: 46368, REG12: 14328, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R8', 'R12'] {PC: 14, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 28657, REG7: 46368, REG8: 14328, REG9: 4000000, REG10: 0, REG11: 46368, REG12: 14328, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R12', 'R0', 'R8'] {PC: 15, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 28657, REG7: 46368, REG8: 14328, REG9: 4000000, REG10: 0, REG11: 46368, REG12: 60696, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [10] {PC: 16, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 28657, REG7: 46368, REG8: 60696, REG9: 4000000, REG10: 0, REG11: 46368, REG12: 60696, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R6', 'R7', 'R11'] {PC: 10, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 28657, REG7: 46368, REG8: 60696, REG9: 4000000, REG10: 0, REG11: 46368, REG12: 60696, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R0', 'R6'] {PC: 11, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 28657, REG7: 46368, REG8: 60696, REG9: 4000000, REG10: 0, REG11: 75025, REG12: 60696, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R11', 'R0', 'R7'] {PC: 12, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 46368, REG7: 46368, REG8: 60696, REG9: 4000000, REG10: 0, REG11: 75025, REG12: 60696, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [6] {PC: 13, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 46368, REG7: 75025, REG8: 60696, REG9: 4000000, REG10: 0, REG11: 75025, REG12: 60696, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 SUB ['R9', 'R7', 'R10'] {PC: 6, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 46368, REG7: 75025, REG8: 60696, REG9: 4000000, REG10: 0, REG11: 75025, REG12: 60696, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [17] {PC: 7, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 46368, REG7: 75025, REG8: 60696, REG9: 4000000, REG10: 3924975, REG11: 75025, REG12: 60696, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 MOD ['R7', 'R15', 'R10'] {PC: 8, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 46368, REG7: 75025, REG8: 60696, REG9: 4000000, REG10: 3924975, REG11: 75025, REG12: 60696, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [14] {PC: 9, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 46368, REG7: 75025, REG8: 60696, REG9: 4000000, REG10: 1, REG11: 75025, REG12: 60696, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R6', 'R7', 'R11'] {PC: 10, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 46368, REG7: 75025, REG8: 60696, REG9: 4000000, REG10: 1, REG11: 75025, REG12: 60696, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R0', 'R6'] {PC: 11, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 46368, REG7: 75025, REG8: 60696, REG9: 4000000, REG10: 1, REG11: 121393, REG12: 60696, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R11', 'R0', 'R7'] {PC: 12, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 75025, REG7: 75025, REG8: 60696, REG9: 4000000, REG10: 1, REG11: 121393, REG12: 60696, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [6] {PC: 13, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 75025, REG7: 121393, REG8: 60696, REG9: 4000000, REG10: 1, REG11: 121393, REG12: 60696, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 SUB ['R9', 'R7', 'R10'] {PC: 6, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 75025, REG7: 121393, REG8: 60696, REG9: 4000000, REG10: 1, REG11: 121393, REG12: 60696, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [17] {PC: 7, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 75025, REG7: 121393, REG8: 60696, REG9: 4000000, REG10: 3878607, REG11: 121393, REG12: 60696, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 MOD ['R7', 'R15', 'R10'] {PC: 8, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 75025, REG7: 121393, REG8: 60696, REG9: 4000000, REG10: 3878607, REG11: 121393, REG12: 60696, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [14] {PC: 9, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 75025, REG7: 121393, REG8: 60696, REG9: 4000000, REG10: 1, REG11: 121393, REG12: 60696, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R6', 'R7', 'R11'] {PC: 10, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 75025, REG7: 121393, REG8: 60696, REG9: 4000000, REG10: 1, REG11: 121393, REG12: 60696, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R0', 'R6'] {PC: 11, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 75025, REG7: 121393, REG8: 60696, REG9: 4000000, REG10: 1, REG11: 196418, REG12: 60696, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R11', 'R0', 'R7'] {PC: 12, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 121393, REG7: 121393, REG8: 60696, REG9: 4000000, REG10: 1, REG11: 196418, REG12: 60696, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [6] {PC: 13, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 121393, REG7: 196418, REG8: 60696, REG9: 4000000, REG10: 1, REG11: 196418, REG12: 60696, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 SUB ['R9', 'R7', 'R10'] {PC: 6, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 121393, REG7: 196418, REG8: 60696, REG9: 4000000, REG10: 1, REG11: 196418, REG12: 60696, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [17] {PC: 7, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 121393, REG7: 196418, REG8: 60696, REG9: 4000000, REG10: 3803582, REG11: 196418, REG12: 60696, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 MOD ['R7', 'R15', 'R10'] {PC: 8, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 121393, REG7: 196418, REG8: 60696, REG9: 4000000, REG10: 3803582, REG11: 196418, REG12: 60696, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [14] {PC: 9, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 121393, REG7: 196418, REG8: 60696, REG9: 4000000, REG10: 0, REG11: 196418, REG12: 60696, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R8', 'R12'] {PC: 14, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 121393, REG7: 196418, REG8: 60696, REG9: 4000000, REG10: 0, REG11: 196418, REG12: 60696, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R12', 'R0', 'R8'] {PC: 15, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 121393, REG7: 196418, REG8: 60696, REG9: 4000000, REG10: 0, REG11: 196418, REG12: 257114, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [10] {PC: 16, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 121393, REG7: 196418, REG8: 257114, REG9: 4000000, REG10: 0, REG11: 196418, REG12: 257114, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R6', 'R7', 'R11'] {PC: 10, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 121393, REG7: 196418, REG8: 257114, REG9: 4000000, REG10: 0, REG11: 196418, REG12: 257114, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R0', 'R6'] {PC: 11, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 121393, REG7: 196418, REG8: 257114, REG9: 4000000, REG10: 0, REG11: 317811, REG12: 257114, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R11', 'R0', 'R7'] {PC: 12, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 196418, REG7: 196418, REG8: 257114, REG9: 4000000, REG10: 0, REG11: 317811, REG12: 257114, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [6] {PC: 13, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 196418, REG7: 317811, REG8: 257114, REG9: 4000000, REG10: 0, REG11: 317811, REG12: 257114, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 SUB ['R9', 'R7', 'R10'] {PC: 6, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 196418, REG7: 317811, REG8: 257114, REG9: 4000000, REG10: 0, REG11: 317811, REG12: 257114, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [17] {PC: 7, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 196418, REG7: 317811, REG8: 257114, REG9: 4000000, REG10: 3682189, REG11: 317811, REG12: 257114, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 MOD ['R7', 'R15', 'R10'] {PC: 8, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 196418, REG7: 317811, REG8: 257114, REG9: 4000000, REG10: 3682189, REG11: 317811, REG12: 257114, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [14] {PC: 9, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 196418, REG7: 317811, REG8: 257114, REG9: 4000000, REG10: 1, REG11: 317811, REG12: 257114, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R6', 'R7', 'R11'] {PC: 10, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 196418, REG7: 317811, REG8: 257114, REG9: 4000000, REG10: 1, REG11: 317811, REG12: 257114, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R0', 'R6'] {PC: 11, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 196418, REG7: 317811, REG8: 257114, REG9: 4000000, REG10: 1, REG11: 514229, REG12: 257114, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R11', 'R0', 'R7'] {PC: 12, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 317811, REG7: 317811, REG8: 257114, REG9: 4000000, REG10: 1, REG11: 514229, REG12: 257114, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [6] {PC: 13, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 317811, REG7: 514229, REG8: 257114, REG9: 4000000, REG10: 1, REG11: 514229, REG12: 257114, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 SUB ['R9', 'R7', 'R10'] {PC: 6, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 317811, REG7: 514229, REG8: 257114, REG9: 4000000, REG10: 1, REG11: 514229, REG12: 257114, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [17] {PC: 7, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 317811, REG7: 514229, REG8: 257114, REG9: 4000000, REG10: 3485771, REG11: 514229, REG12: 257114, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 MOD ['R7', 'R15', 'R10'] {PC: 8, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 317811, REG7: 514229, REG8: 257114, REG9: 4000000, REG10: 3485771, REG11: 514229, REG12: 257114, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [14] {PC: 9, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 317811, REG7: 514229, REG8: 257114, REG9: 4000000, REG10: 1, REG11: 514229, REG12: 257114, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R6', 'R7', 'R11'] {PC: 10, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 317811, REG7: 514229, REG8: 257114, REG9: 4000000, REG10: 1, REG11: 514229, REG12: 257114, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R0', 'R6'] {PC: 11, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 317811, REG7: 514229, REG8: 257114, REG9: 4000000, REG10: 1, REG11: 832040, REG12: 257114, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R11', 'R0', 'R7'] {PC: 12, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 514229, REG7: 514229, REG8: 257114, REG9: 4000000, REG10: 1, REG11: 832040, REG12: 257114, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [6] {PC: 13, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 514229, REG7: 832040, REG8: 257114, REG9: 4000000, REG10: 1, REG11: 832040, REG12: 257114, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 SUB ['R9', 'R7', 'R10'] {PC: 6, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 514229, REG7: 832040, REG8: 257114, REG9: 4000000, REG10: 1, REG11: 832040, REG12: 257114, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [17] {PC: 7, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 514229, REG7: 832040, REG8: 257114, REG9: 4000000, REG10: 3167960, REG11: 832040, REG12: 257114, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 MOD ['R7', 'R15', 'R10'] {PC: 8, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 514229, REG7: 832040, REG8: 257114, REG9: 4000000, REG10: 3167960, REG11: 832040, REG12: 257114, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [14] {PC: 9, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 514229, REG7: 832040, REG8: 257114, REG9: 4000000, REG10: 0, REG11: 832040, REG12: 257114, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R8', 'R12'] {PC: 14, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 514229, REG7: 832040, REG8: 257114, REG9: 4000000, REG10: 0, REG11: 832040, REG12: 257114, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R12', 'R0', 'R8'] {PC: 15, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 514229, REG7: 832040, REG8: 257114, REG9: 4000000, REG10: 0, REG11: 832040, REG12: 1089154, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [10] {PC: 16, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 514229, REG7: 832040, REG8: 1089154, REG9: 4000000, REG10: 0, REG11: 832040, REG12: 1089154, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R6', 'R7', 'R11'] {PC: 10, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 514229, REG7: 832040, REG8: 1089154, REG9: 4000000, REG10: 0, REG11: 832040, REG12: 1089154, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R0', 'R6'] {PC: 11, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 514229, REG7: 832040, REG8: 1089154, REG9: 4000000, REG10: 0, REG11: 1346269, REG12: 1089154, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R11', 'R0', 'R7'] {PC: 12, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 832040, REG7: 832040, REG8: 1089154, REG9: 4000000, REG10: 0, REG11: 1346269, REG12: 1089154, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [6] {PC: 13, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 832040, REG7: 1346269, REG8: 1089154, REG9: 4000000, REG10: 0, REG11: 1346269, REG12: 1089154, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 SUB ['R9', 'R7', 'R10'] {PC: 6, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 832040, REG7: 1346269, REG8: 1089154, REG9: 4000000, REG10: 0, REG11: 1346269, REG12: 1089154, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [17] {PC: 7, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 832040, REG7: 1346269, REG8: 1089154, REG9: 4000000, REG10: 2653731, REG11: 1346269, REG12: 1089154, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 MOD ['R7', 'R15', 'R10'] {PC: 8, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 832040, REG7: 1346269, REG8: 1089154, REG9: 4000000, REG10: 2653731, REG11: 1346269, REG12: 1089154, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [14] {PC: 9, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 832040, REG7: 1346269, REG8: 1089154, REG9: 4000000, REG10: 1, REG11: 1346269, REG12: 1089154, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R6', 'R7', 'R11'] {PC: 10, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 832040, REG7: 1346269, REG8: 1089154, REG9: 4000000, REG10: 1, REG11: 1346269, REG12: 1089154, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R0', 'R6'] {PC: 11, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 832040, REG7: 1346269, REG8: 1089154, REG9: 4000000, REG10: 1, REG11: 2178309, REG12: 1089154, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R11', 'R0', 'R7'] {PC: 12, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 1346269, REG7: 1346269, REG8: 1089154, REG9: 4000000, REG10: 1, REG11: 2178309, REG12: 1089154, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [6] {PC: 13, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 1346269, REG7: 2178309, REG8: 1089154, REG9: 4000000, REG10: 1, REG11: 2178309, REG12: 1089154, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 SUB ['R9', 'R7', 'R10'] {PC: 6, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 1346269, REG7: 2178309, REG8: 1089154, REG9: 4000000, REG10: 1, REG11: 2178309, REG12: 1089154, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [17] {PC: 7, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 1346269, REG7: 2178309, REG8: 1089154, REG9: 4000000, REG10: 1821691, REG11: 2178309, REG12: 1089154, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 MOD ['R7', 'R15', 'R10'] {PC: 8, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 1346269, REG7: 2178309, REG8: 1089154, REG9: 4000000, REG10: 1821691, REG11: 2178309, REG12: 1089154, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [14] {PC: 9, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 1346269, REG7: 2178309, REG8: 1089154, REG9: 4000000, REG10: 1, REG11: 2178309, REG12: 1089154, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R6', 'R7', 'R11'] {PC: 10, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 1346269, REG7: 2178309, REG8: 1089154, REG9: 4000000, REG10: 1, REG11: 2178309, REG12: 1089154, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R0', 'R6'] {PC: 11, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 1346269, REG7: 2178309, REG8: 1089154, REG9: 4000000, REG10: 1, REG11: 3524578, REG12: 1089154, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R11', 'R0', 'R7'] {PC: 12, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 2178309, REG7: 2178309, REG8: 1089154, REG9: 4000000, REG10: 1, REG11: 3524578, REG12: 1089154, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [6] {PC: 13, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 2178309, REG7: 3524578, REG8: 1089154, REG9: 4000000, REG10: 1, REG11: 3524578, REG12: 1089154, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 SUB ['R9', 'R7', 'R10'] {PC: 6, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 2178309, REG7: 3524578, REG8: 1089154, REG9: 4000000, REG10: 1, REG11: 3524578, REG12: 1089154, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [17] {PC: 7, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 2178309, REG7: 3524578, REG8: 1089154, REG9: 4000000, REG10: 475422, REG11: 3524578, REG12: 1089154, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 MOD ['R7', 'R15', 'R10'] {PC: 8, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 2178309, REG7: 3524578, REG8: 1089154, REG9: 4000000, REG10: 475422, REG11: 3524578, REG12: 1089154, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [14] {PC: 9, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 2178309, REG7: 3524578, REG8: 1089154, REG9: 4000000, REG10: 0, REG11: 3524578, REG12: 1089154, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R8', 'R12'] {PC: 14, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 2178309, REG7: 3524578, REG8: 1089154, REG9: 4000000, REG10: 0, REG11: 3524578, REG12: 1089154, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R12', 'R0', 'R8'] {PC: 15, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 2178309, REG7: 3524578, REG8: 1089154, REG9: 4000000, REG10: 0, REG11: 3524578, REG12: 4613732, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [10] {PC: 16, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 2178309, REG7: 3524578, REG8: 4613732, REG9: 4000000, REG10: 0, REG11: 3524578, REG12: 4613732, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R6', 'R7', 'R11'] {PC: 10, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 2178309, REG7: 3524578, REG8: 4613732, REG9: 4000000, REG10: 0, REG11: 3524578, REG12: 4613732, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R7', 'R0', 'R6'] {PC: 11, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 2178309, REG7: 3524578, REG8: 4613732, REG9: 4000000, REG10: 0, REG11: 5702887, REG12: 4613732, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 ADD ['R11', 'R0', 'R7'] {PC: 12, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 3524578, REG7: 3524578, REG8: 4613732, REG9: 4000000, REG10: 0, REG11: 5702887, REG12: 4613732, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JUMP [6] {PC: 13, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 3524578, REG7: 5702887, REG8: 4613732, REG9: 4000000, REG10: 0, REG11: 5702887, REG12: 4613732, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 SUB ['R9', 'R7', 'R10'] {PC: 6, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 3524578, REG7: 5702887, REG8: 4613732, REG9: 4000000, REG10: 0, REG11: 5702887, REG12: 4613732, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 JZ [17] {PC: 7, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 3524578, REG7: 5702887, REG8: 4613732, REG9: 4000000, REG10: -1702887, REG11: 5702887, REG12: 4613732, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 WRITE_PORT ['R12'] {PC: 17, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 3524578, REG7: 5702887, REG8: 4613732, REG9: 4000000, REG10: -1702887, REG11: 5702887, REG12: 4613732, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 NOP [] {PC: 18, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: 3524578, REG7: 5702887, REG8: 4613732, REG9: 4000000, REG10: -1702887, REG11: 5702887, REG12: 4613732, REG13: , REG14: 0, REG15: 2, OUTPUT_PORT: ['4', '6', '1', '3', '7', '3', '2']}

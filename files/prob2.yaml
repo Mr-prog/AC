@@ -27,3 +27,29 @@ add_to_sum:
 end:
     WRITE_PORT R3, POUT             ; Вывести сумму на экран
     NOP                             ; Завершение программы
+
+
+section_program
+LOADMEMORY num1 R6
+LOADMEMORY num2 R7
+LOADMEMORY num3 R8
+LOADMEMORY high_level R9
+LOADMEMORY num2 R11
+fib_loop:
+ADD R6 R7 R10
+ADD R7 R0 R1
+ADD R10 R0 R7 
+MOD R10 R11 R12
+JZ add_to_sum
+check_limit:
+SUB R9 R10 R13
+JUMP check_limit
+end:
+MOV R13 R3
+WRITE_PORT
+NOP
+section_data
+num1 $ 1
+num2 $ 2
+num3 $ 3
+high_level $ 4000000

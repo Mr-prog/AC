@@ -1,17 +1,25 @@
 in_source: |
-  LOADI "hello", R1
-  LOADI " world", R2
-  WRITE_PORT R1
-  WRITE_PORT R2
-  NOP
-in_stdin: ""
+  section_data
+  hello $ hello
+  world $ , world!
+  section_program
+  start:
+    LOADMEMORY hello R6
+    LOADMEMORY world R7
+    WRITE_PORT R6
+    WRITE_PORT R7
+    NOP
+in_stdin: ''
 out_code: |
-  opcode=LOADI operands_type=TWO operands=['hello', 1]
-  opcode=LOADI operands_type=TWO operands=[' world', 2]
-  opcode=WRITE_PORT operands_type=ONE operands=[1]
-  opcode=WRITE_PORT operands_type=ONE operands=[2]
-  opcode=NOP operands_type=NONE operands=[]
-out_stdout: "hello world"
+  Instruction counter: 0, LOADMEMORY ['hello', 'R6']
+  Instruction counter: 1, LOADMEMORY ['world', 'R7']
+  Instruction counter: 2, WRITE_PORT ['R6']
+  Instruction counter: 3, WRITE_PORT ['R7']
+  Instruction counter: 4, NOP []
+out_stdout: 'hello, world!'
 out_log: |
-  DEBUG:translator:Start translation...
-  DEBUG:machine:Running program...
+  DEBUG    root:machine.py:234 LOADMEMORY ['hello', 'R6'] {PC: 0, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: , REG7: , REG8: , REG9: , REG10: , REG11: , REG12: , REG13: , REG14: , REG15: , OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 LOADMEMORY ['world', 'R7'] {PC: 1, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: hello, REG7: , REG8: , REG9: , REG10: , REG11: , REG12: , REG13: , REG14: , REG15: , OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 WRITE_PORT ['R6'] {PC: 2, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: hello, REG7: , world!, REG8: , REG9: , REG10: , REG11: , REG12: , REG13: , REG14: , REG15: , OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 WRITE_PORT ['R7'] {PC: 3, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: hello, REG7: , world!, REG8: , REG9: , REG10: , REG11: , REG12: , REG13: , REG14: , REG15: , OUTPUT_PORT: ['h', 'e', 'l', 'l', 'o']}
+  DEBUG    root:machine.py:234 NOP [] {PC: 4, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: hello, REG7: , world!, REG8: , REG9: , REG10: , REG11: , REG12: , REG13: , REG14: , REG15: , OUTPUT_PORT: ['h', 'e', 'l', 'l', 'o', ',', ' ', 'w', 'o', 'r', 'l', 'd', '!']}

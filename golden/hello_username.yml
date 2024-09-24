@@ -1,25 +1,38 @@
 in_source: |
-  LOADI "What is your name?", R1
-  WRITE_PORT R1
-  READ_PORT R2
-  LOADI "Hello, ", R3
-  WRITE_PORT R3
-  WRITE_PORT R2
-  LOADI "!", R4
-  WRITE_PORT R4
-  NOP
-in_stdin: "Alice"
+  section_data
+  question $ What is your name?
+  hello $ Hello, 
+  mark $ !
+  section_program
+  start:
+    LOADMEMORY question R6
+    LOADMEMORY hello R7
+    LOADMEMORY mark R8
+    WRITE_PORT R6
+    READ_PORT
+    WRITE_PORT R7
+    WRITE_PORT R4
+    WRITE_PORT R8
+    NOP
+in_stdin: '"A","l","i","c","e"'
 out_code: |
-  opcode=LOADI operands_type=TWO operands=['What is your name?', 1]
-  opcode=WRITE_PORT operands_type=ONE operands=[1]
-  opcode=READ_PORT operands_type=ONE operands=[2]
-  opcode=LOADI operands_type=TWO operands=['Hello, ', 3]
-  opcode=WRITE_PORT operands_type=ONE operands=[3]
-  opcode=WRITE_PORT operands_type=ONE operands=[2]
-  opcode=LOADI operands_type=TWO operands=['!', 4]
-  opcode=WRITE_PORT operands_type=ONE operands=[4]
-  opcode=NOP operands_type=NONE operands=[]
-out_stdout: "What is your name?Hello, Alice!"
+  Instruction counter: 0, LOADMEMORY ['question', 'R6']
+  Instruction counter: 1, LOADMEMORY ['hello', 'R7']
+  Instruction counter: 2, LOADMEMORY ['mark', 'R8']
+  Instruction counter: 3, WRITE_PORT ['R6']
+  Instruction counter: 4, READ_PORT []
+  Instruction counter: 5, WRITE_PORT ['R7']
+  Instruction counter: 6, WRITE_PORT ['R4']
+  Instruction counter: 7, WRITE_PORT ['R8']
+  Instruction counter: 8, NOP []
+out_stdout: 'What is your name?Hello,Alice!'
 out_log: |
-  DEBUG:translator:Start translation...
-  DEBUG:machine:Running program...
+  DEBUG    root:machine.py:234 LOADMEMORY ['question', 'R6'] {PC: 0, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: , REG7: , REG8: , REG9: , REG10: , REG11: , REG12: , REG13: , REG14: , REG15: , OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 LOADMEMORY ['hello', 'R7'] {PC: 1, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: What is your name?, REG7: , REG8: , REG9: , REG10: , REG11: , REG12: , REG13: , REG14: , REG15: , OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 LOADMEMORY ['mark', 'R8'] {PC: 2, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: What is your name?, REG7: Hello,, REG8: , REG9: , REG10: , REG11: , REG12: , REG13: , REG14: , REG15: , OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 WRITE_PORT ['R6'] {PC: 3, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: What is your name?, REG7: Hello,, REG8: !, REG9: , REG10: , REG11: , REG12: , REG13: , REG14: , REG15: , OUTPUT_PORT: []}
+  DEBUG    root:machine.py:234 READ_PORT [] {PC: 4, REG0: 0, REG1: , REG2: , REG3: , REG4: , REG5: , REG6: What is your name?, REG7: Hello,, REG8: !, REG9: , REG10: , REG11: , REG12: , REG13: , REG14: , REG15: , OUTPUT_PORT: ['W', 'h', 'a', 't', ' ', 'i', 's', ' ', 'y', 'o', 'u', 'r', ' ', 'n', 'a', 'm', 'e', '?']}
+  DEBUG    root:machine.py:234 WRITE_PORT ['R7'] {PC: 5, REG0: 0, REG1: , REG2: , REG3: , REG4: Alice, REG5: , REG6: What is your name?, REG7: Hello,, REG8: !, REG9: , REG10: , REG11: , REG12: , REG13: , REG14: , REG15: , OUTPUT_PORT: ['W', 'h', 'a', 't', ' ', 'i', 's', ' ', 'y', 'o', 'u', 'r', ' ', 'n', 'a', 'm', 'e', '?']}
+  DEBUG    root:machine.py:234 WRITE_PORT ['R4'] {PC: 6, REG0: 0, REG1: , REG2: , REG3: , REG4: Alice, REG5: , REG6: What is your name?, REG7: Hello,, REG8: !, REG9: , REG10: , REG11: , REG12: , REG13: , REG14: , REG15: , OUTPUT_PORT: ['W', 'h', 'a', 't', ' ', 'i', 's', ' ', 'y', 'o', 'u', 'r', ' ', 'n', 'a', 'm', 'e', '?', 'H', 'e', 'l', 'l', 'o', ',']}
+  DEBUG    root:machine.py:234 WRITE_PORT ['R8'] {PC: 7, REG0: 0, REG1: , REG2: , REG3: , REG4: Alice, REG5: , REG6: What is your name?, REG7: Hello,, REG8: !, REG9: , REG10: , REG11: , REG12: , REG13: , REG14: , REG15: , OUTPUT_PORT: ['W', 'h', 'a', 't', ' ', 'i', 's', ' ', 'y', 'o', 'u', 'r', ' ', 'n', 'a', 'm', 'e', '?', 'H', 'e', 'l', 'l', 'o', ',', 'A', 'l', 'i', 'c', 'e']}
+  DEBUG    root:machine.py:234 NOP [] {PC: 8, REG0: 0, REG1: , REG2: , REG3: , REG4: Alice, REG5: , REG6: What is your name?, REG7: Hello,, REG8: !, REG9: , REG10: , REG11: , REG12: , REG13: , REG14: , REG15: , OUTPUT_PORT: ['W', 'h', 'a', 't', ' ', 'i', 's', ' ', 'y', 'o', 'u', 'r', ' ', 'n', 'a', 'm', 'e', '?', 'H', 'e', 'l', 'l', 'o', ',', 'A', 'l', 'i', 'c', 'e', '!']}

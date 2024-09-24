@@ -9,3 +9,12 @@ start:
 
 end:
     NOP                        ; Завершение программы
+
+
+section_program
+READ_PORT
+
+MOV R4 R3
+WRITE_PORT
+NOP
+section_data
