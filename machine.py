@@ -238,3 +238,4 @@ def simulation(data: dict, instructions: list, input_stream: list[str], limit: i
     except StopIteration:
         pass
     return ''.join(control_unit.data_path.output_stream), instr_counter, '\n'.join(mnemonic) + "\n"
+
